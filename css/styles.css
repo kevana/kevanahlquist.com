@@ -1,0 +1,58 @@
+body {
+    width: 600px;
+    margin: 20px auto;
+    font-family: 'District Pro', sans-serif;
+    font-size: 1.5em;
+    color: #333;
+    font-smoothing: antialiased;
+    text-align: center;
+    line-height: 135%;
+}
+
+.avatar {
+    border-radius: 100px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'District Pro', sans-serif;
+    font-weight: normal;
+    color: #000;
+}
+
+h1 {
+    font-size: 2em;
+}
+
+h2 {
+    font-size: 1.5em;
+}
+
+h1, h2, p {
+    margin-bottom: 24px;
+}
+
+a {
+    color: #368;
+    text-decoration: none;
+}
+
+/* Flaired edges, by Tomas Theunissen */
+		
+hr {
+    height: 15px;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px 0 0 0;
+    border-radius: 20px;
+    margin-bottom: 5px;
+}
+hr:before { /* Not really supposed to work, but does */
+    display: block;
+    content: "";
+    height: 15px;
+    margin-top: -16px;
+    border-style: solid;
+    border-color: black;
+    border-width: 0 0 1px 0;
+    border-radius: 20px;
+}

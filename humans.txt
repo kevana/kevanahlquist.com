@@ -1,0 +1,20 @@
+KK  KK                                
+KK KK    eee  vv   vv   aa aa nn nnn  
+KKKK   ee   e  vv vv   aa aaa nnn  nn 
+KK KK  eeeee    vvv   aa  aaa nn   nn 
+KK  KK  eeeee    v     aaa aa nn   nn
+
+
+/* ABOUT THIS FILE */
+  Description: We Are People, Not Machines
+  More informations: <http://humanstxt.org/>
+
+/*TEAM*/
+  Developer: Kevan Ahlquist
+  Site: http://github.com/kevana
+  Location: Minneapolis, MN
+
+/*SITE*/
+  Last update: 2014/05/23
+  Doctype: HTML5
+  IDE: Sublime Text

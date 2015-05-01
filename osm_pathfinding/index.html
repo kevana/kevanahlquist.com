@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OSM Pathfinding</title>
+  <link href='//api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css' rel='stylesheet'>
+  <link href='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet'>
+  <link href='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet'>
+  <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+  <link href="lib/leaflet-awesome-markers/leaflet.awesome-markers.css" rel="stylesheet">
+  <link href="lib/chosen/chosen.min.css" rel="stylesheet">
+  <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    #map {
+      position: absolute;
+      top: 50px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+    #controls {
+      margin-left: 10px;
+      padding-top: 10px;
+    }
+    .slider.range {
+      display: none;
+    }
+    .slider-container {
+      margin-left: 20px;
+    }
+    /* slider root element */
+    .slider {
+      display: inline-block;
+      background:#3C72E6 url("https://raw.githubusercontent.com/jquerytools/jquerytools.github.com/master/media/img/gradient/h30.png") repeat-x 0 0;
+      height:9px;
+      position:relative;
+      cursor:pointer;
+      border:1px solid #333;
+      width:200px;
+      margin-top:10px;
+      margin-left: 10px;
+      margin-right: 10px;
+      -moz-border-radius:5px;
+      -webkit-border-radius:5px;
+      -moz-box-shadow:inset 0 0 8px #000;
+    }
+    /* progress bar (enabled with progress: true) */
+    .progress {
+      height:9px;
+      background-color:#C5FF00;
+      display:none;
+      opacity:0.6;
+    }
+    /* drag handle */
+    .handle {
+      background:#fff url("https://raw.githubusercontent.com/jquerytools/jquerytools.github.com/master/media/img/gradient/h30.png") repeat-x 0 0;
+      height:28px;
+      width:28px;
+      top:-12px;
+      position:absolute;
+      margin-top:1px;
+      border:1px solid #000;
+      cursor:move;
+      -moz-box-shadow:0 0 6px #000;
+      -webkit-box-shadow:0 0 6px #000;
+      -moz-border-radius:14px;
+      -webkit-border-radius:14px;
+    }
+    /* the input field */
+    .range {
+      border:1px inset #ddd;
+      font-size:20px;
+      margin:0 0 0 15px;
+      padding:3px 0;
+      text-align:center;
+      width:50px;
+      -moz-border-radius:5px;
+      -webkit-border-radius:5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <p class="non-sliders">
+      Use
+      <select name="algo" id="algo-sel" class="algo">
+        <option value="" style="display:none;"></option>
+        <option value="astar">A*</option>
+        <option value="bfs">Breadth First Search</option>
+        <option value="gbfs">Greedy Best First Search</option>
+        <option value="ucs">Uniform Cost Search</option>
+        <option value="dfs">Depth First Search</option>
+      </select>
+      to get from
+      <select name="start" id="start-sel" class="loc">
+        <option value="" style="display:none;"></option>
+      </select>
+      to
+      <select name="goal" id="goal-sel" class="loc">
+        <option value="" style="display:none;"></option>
+      </select>
+      <button id="start-btn" class="btn btn-success btn-xs" disabled>Start</button>
+      <button id="stop-btn" class="btn btn-danger btn-xs" disabled>Stop</button>
+      <button id="clear-btn" class="btn btn-primary btn-xs">Clear</button>
+      
+      <span class="slider-container">
+        Fast
+        <input type="range" class="slider" name="test" min="-8" max="40" step="8" value="0">
+        Slow
+      </span>
+    </p>
+  </div>
+  <div id="map"></div>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+  <script src="//cdn.jquerytools.org/1.2.7/full/jquery.tools.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+  <script src="//api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js"></script>
+  <script src="//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js"></script>
+  <script src="lib/leaflet-awesome-markers/leaflet.awesome-markers.min.js"></script>
+  <script src="lib/chosen/chosen.jquery.min.js"></script>
+  <script src="lib/chosen/chosen.proto.min.js"></script>
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+  <script src="js/presentation.js"></script>
+  <script src="js/form-setup.js"></script>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement($
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore($
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-49474610-1', 'kevanahlquist.com');
+    ga('send', 'pageview');
+  </script>
+</body>
+</html>

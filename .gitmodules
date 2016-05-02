@@ -1,0 +1,3 @@
+[submodule "osm_pathfinding"]
+	path = osm_pathfinding
+	url = https://github.com/kevana/osm-pathfinding.git

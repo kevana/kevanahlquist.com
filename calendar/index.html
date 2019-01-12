@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Every Day Calendar</title>
+    <meta name="description"
+          content="Minimal Every Day Calendar. Cloned with ❤ from Simone Giertz's http://www.simonegiertz.com/">
+    <meta name="author" content="Kevan Ahlquist">
+    <!-- Disclaimer, this was a 1hr project, don't expect good code, responsiveness, or browser support -->
+
+    <style>
+        body {
+            background-color: #111;
+            color: rgb(173, 123, 61);
+        }
+
+        .flex-grid {
+            display: flex;
+        }
+
+        .col {
+            flex: 1;
+            text-align: center;
+        }
+
+        .day {
+            /* Flex to center text vertically */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            margin: 15px auto;
+            width: 2em;
+            height: 2em;
+            border: 6px solid;
+        }
+
+        .lit {
+            color: rgb(255, 255, 235);
+            border-color: rgb(255, 255, 235);
+        }
+    </style>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-49474610-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+
+      gtag('js', new Date());
+
+      gtag('config', 'UA-49474610-1');
+    </script>
+</head>
+
+<body>
+<div id="app" class="flex-grid">
+</div>
+<script>
+  function getElementFromHtmlString(str) {
+    const div = document.createElement('div');
+    div.innerHTML = str;
+    return div.firstChild;
+  }
+
+  const app = document.getElementById('app');
+
+  const months = {
+    'jan': 31,
+    'feb': 28,
+    'mar': 31,
+    'apr': 30,
+    'may': 31,
+    'jun': 30,
+    'jul': 31,
+    'aug': 31,
+    'sept': 30,
+    'oct': 31,
+    'nov': 30,
+    'dec': 31,
+  };
+
+  const monthTemplate = '<div class="month col"><h2>{name}</h2><div class="days"></div></div>';
+  const dayTemplate = '<div id="{id}" class="day"><strong>{day}</strong></div>';
+
+  for (let [month, days] of Object.entries(months)) {
+    console.log(month, days);
+
+    let monthDom = getElementFromHtmlString(monthTemplate.replace('{name}', month));
+    app.appendChild(monthDom);
+
+    console.log(monthDom);
+    Array(days).fill().map((_, day) => {
+      let dayDom = getElementFromHtmlString(dayTemplate
+        .replace('{id}', month + day)
+        .replace('{day}', day + 1));  // Convert to 1-indexing for human consumption
+      monthDom.getElementsByClassName('days')[0].appendChild(dayDom);
+    })
+  }
+
+  function toggleLight(event) {
+    if (event.target.classList.contains('day')) {
+      event.target.classList.toggle('lit');
+      saveLitDays();
+    }
+  }
+
+  function loadLitDays() {
+    const litDayIds = JSON.parse(localStorage.getItem('litDayIds'));
+    litDayIds.forEach(id => {
+      document.getElementById(id).classList.add('lit');
+    })
+  }
+
+  function saveLitDays() {
+    const litDayIds = Array.from(document.querySelectorAll('.day.lit')).map(elem => elem.id);
+    localStorage.setItem('litDayIds', JSON.stringify(litDayIds));
+  }
+
+  document.addEventListener('click', toggleLight);
+  document.addEventListener('DOMContentLoaded', loadLitDays);
+</script>
+</body>
+</html>

@@ -73,13 +73,10 @@
   const dayTemplate = '<div id="{id}" class="day"><strong>{day}</strong></div>';
 
   for (let [month, days] of Object.entries(months)) {
-    console.log(month, days);
-
     let monthDom = getElementFromHtmlString(monthTemplate.replace('{name}', month));
     app.appendChild(monthDom);
 
-    console.log(monthDom);
-    Array(days).fill().map((_, day) => {
+    Array(days).fill().forEach((_, day) => {
       let dayDom = getElementFromHtmlString(dayTemplate
         .replace('{id}', month + day)
         .replace('{day}', day + 1));  // Convert to 1-indexing for human consumption
@@ -96,8 +93,10 @@
 
   function loadLitDays() {
     const litDayIds = JSON.parse(localStorage.getItem('litDayIds'));
+    if (!litDayIds) return;
     litDayIds.forEach(id => {
-      document.getElementById(id).classList.add('lit');
+      const el = document.getElementById(id);
+      if (el) el.classList.add('lit');
     })
   }
 

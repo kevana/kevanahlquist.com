@@ -7,7 +7,6 @@ Personal portfolio website for Kevan Ahlquist at **www.kevanahlquist.com**. This
 ## Tech Stack
 
 - HTML5, CSS3, vanilla JS
-- Bootstrap + jQuery (in `/snow` template)
 - Font Awesome for icons
 - Custom "District Pro" font
 - Docker (nginx) for local/containerized serving
@@ -21,7 +20,6 @@ projects.html       # Projects showcase
 calendar/           # "Every Day Calendar" mini-project
 css/                # Stylesheets and custom font files
 images/             # Favicon and images
-snow/               # Start Bootstrap landing page template
 osm_pathfinding/    # Git submodule (OpenStreetMap pathfinding project)
 build.sh            # Docker build script
 Dockerfile          # nginx container config
@@ -46,5 +44,4 @@ The site is published via the `gh-pages` branch. **Do not push directly to `gh-p
 
 - Keep it simple — no frameworks, bundlers, or unnecessary tooling
 - No linting, testing, or formatting tools are configured
-- The `/snow` directory is a vendored Bootstrap template; avoid modifying it unless necessary
 - `osm_pathfinding/` is a git submodule — use `git submodule update --init` if needed

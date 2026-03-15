@@ -1,28 +1,42 @@
+:root {
+    --color-bg: #eee;
+    --color-text: #333;
+    --color-text-secondary: #4f4f4f;
+    --color-heading: #000;
+    --color-link: #368;
+    --color-hr: #888;
+    --font-family: 'District Pro', sans-serif;
+    --spacing-sm: 0.3125rem;
+    --spacing-md: 0.9375rem;
+    --spacing-lg: 1.5rem;
+}
+
 body {
-    width: 600px;
-    margin: 20px auto;
-    font-family: 'District Pro', sans-serif;
+    max-width: 37.5rem;
+    width: 90%;
+    margin: 1.25rem auto;
+    font-family: var(--font-family);
     font-size: 1.5em;
-    color: #333;
-    font-smoothing: antialiased;
+    color: var(--color-text);
     text-align: center;
     line-height: 135%;
-    background-color: #eee;
+    background-color: var(--color-bg);
 }
 
 .avatar {
-    border-radius: 100px;
+    border-radius: 50%;
+    margin: 0 auto;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'District Pro', sans-serif;
+    font-family: var(--font-family);
     font-weight: normal;
-    color: #000;
+    color: var(--color-heading);
 }
 
 h1 {
     font-size: 2em;
-    margin-top: 24px;
+    margin-top: var(--spacing-lg);
 }
 
 h2 {
@@ -30,55 +44,85 @@ h2 {
 }
 
 h1, h2, p {
-    margin-bottom: 24px;
+    margin-bottom: var(--spacing-lg);
 }
 
 p, ul {
-    color: #4f4f4f;
+    color: var(--color-text-secondary);
 }
 
 a {
-    color: #368;
+    color: var(--color-link);
     text-decoration: none;
 }
 
 /* Flaired edges, by Tomas Theunissen */
-		
+
 hr {
-    height: 15px;
+    height: 0.9375rem;
     border-style: solid;
-    border-color: #888;
+    border-color: var(--color-hr);
     border-width: 1px 0 0 0;
-    border-radius: 20px;
-    margin-bottom: 5px;
+    border-radius: 1.25rem;
+    margin-bottom: var(--spacing-sm);
 }
-hr:before { /* Not really supposed to work, but does */
+hr:before {
     display: block;
     content: "";
-    height: 15px;
-    margin-top: -16px;
+    height: 0.9375rem;
+    margin-top: -1rem;
     border-style: solid;
-    border-color: #888;
+    border-color: var(--color-hr);
     border-width: 0 0 1px 0;
-    border-radius: 20px;
+    border-radius: 1.25rem;
 }
 
 .center {
-    width: 400px;
-    margin: 0 auto;
+    display: flex;
+    justify-content: center;
     text-align: left;
-    padding-left: 100px;
 }
 
 ul.nav {
     list-style-type: none;
-    margin: 15px;
-}
-
-ul.nav li {
-    display: inline;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0;
+    margin: var(--spacing-md) 0;
 }
 
 ul.nav li:not(:last-child):after {
     content: " |";
+}
+
+.avatar {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 1.25rem;
+    }
+
+    h1 {
+        font-size: 1.75em;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-bg: #1a1a2e;
+        --color-text: #e0e0e0;
+        --color-text-secondary: #b0b0b0;
+        --color-heading: #f0f0f0;
+        --color-link: #6db3f2;
+        --color-hr: #555;
+    }
+
+    .avatar {
+        border: 2px solid var(--color-hr);
+    }
 }

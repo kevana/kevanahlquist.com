@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+import profileImg from '../images/profile.jpg';
 ---
 
 <BaseLayout
@@ -13,7 +15,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <main>
         <h1>Kevan Ahlquist</h1>
 
-        <img src="https://www.gravatar.com/avatar/b7cdc5224f104d3d55379c72658abd18.png?s=200" alt="Kevan Ahlquist" class="avatar" width="200" height="200" />
+        <Image src={profileImg} alt="Kevan Ahlquist" class="avatar" width={350} height={350} quality="max" loading="eager" />
         <nav>
             <ul class="nav">
                 <li><a href="mailto:kevan@kevanahlquist.com">Email</a></li>
@@ -46,7 +48,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <div class="center">
             <ul>
                 <li><a href="https://www.amazon.com/" target="_blank" rel="noopener">Amazon</a></li>
-                <li><a href="https://www.bluestembrands.com/" target="_blank" rel="noopener">Bluestem Brands</a></li>
+                <li><a href="https://en.wikipedia.org/wiki/Fingerhut" target="_blank" rel="noopener">Bluestem Brands</a></li>
                 <li><a href="https://www.oati.com" target="_blank" rel="noopener">Open Access Technology International</a></li>
                 <li><a href="https://www.sa-solutions.com/" target="_blank" rel="noopener">Superior Access Solutions</a></li>
                 <li>Two summers touring with the <a href="https://bluecoats.com/" target="_blank" rel="noopener">Bluecoats.</a></li>

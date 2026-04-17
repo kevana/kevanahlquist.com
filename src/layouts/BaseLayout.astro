@@ -6,9 +6,11 @@ interface Props {
   ogTitle?: string;
   ogDescription?: string;
   ogUrl?: string;
+  canonicalUrl?: string;
+  bodyClass?: string;
 }
 
-const { title, description, keywords, ogTitle, ogDescription, ogUrl } = Astro.props;
+const { title, description, keywords, ogTitle, ogDescription, ogUrl, canonicalUrl, bodyClass } = Astro.props;
 ---
 
 <!DOCTYPE html>
@@ -26,12 +28,13 @@ const { title, description, keywords, ogTitle, ogDescription, ogUrl } = Astro.pr
     <meta property="og:type" content="website" />
     {ogUrl && <meta property="og:url" content={ogUrl} />}
 
+    <link rel="canonical" href={canonicalUrl ?? Astro.url.href} />
     <link rel="shortcut icon" href="/images/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="/css/reset.css" />
     <link rel="stylesheet" type="text/css" href="/css/styles.css" />
     <link rel="stylesheet" type="text/css" href="/css/district_pro/stylesheet.css" />
 </head>
-<body>
+<body class={bodyClass}>
     <slot />
 </body>
 </html>

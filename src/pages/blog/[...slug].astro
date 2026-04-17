@@ -20,6 +20,8 @@ const { Content } = await render(post);
   ogTitle={post.data.title}
   ogDescription={post.data.description}
   ogUrl={`https://www.kevanahlquist.com/blog/${post.id}/`}
+  canonicalUrl={post.data.canonicalUrl}
+  bodyClass="blog"
 >
     <main>
         <article>

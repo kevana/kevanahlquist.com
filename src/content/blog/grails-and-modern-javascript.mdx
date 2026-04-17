@@ -1,0 +1,33 @@
+---
+title: "Grails and modern Javascript development, crossing the gap"
+description: "How to use NPM packages and fast unit tests in a Grails project without giving up asset-pipeline."
+pubDate: 2016-01-16
+tags: ["grails", "javascript"]
+canonicalUrl: "https://medium.com/@kevanahlquist/grails-and-modern-javascript-development-crossing-the-gap-e98aa65dd9be"
+---
+
+*View a sample project with the ideas from this post [here](https://github.com/kevana/grails-es6-mocha-demo).*
+
+We want to use shiny new JS libraries that tend to only be available on NPM, and we want unit tests to be blazing fast.
+
+#### Why it's not easy
+
+- NPM is convenient, but lots of modern Javascript projects assume Browserify or webpack is in your build pipeline.
+- Grails and asset-pipeline have a powerful plugin architecture (e.g. plugins can provide assets but your project can override them), but that means you need to use asset-pipeline to resolve files. This makes it difficult to use with tools like Webpack and Browserify. (see [less-asset-pipeline](https://github.com/bertramdev/less-asset-pipeline) for an example of a JS tool hooking into asset-pipeline for file resolution, it involves RhinoJS and the apparently-abandoned [env.js](https://github.com/thatcher/env-js))
+- Tests need to be fast if we want people to use them, running browser-based tests in PhantomJS or a running app server is too slow.
+
+#### The key
+
+In the absence of Grails plugins for Webpack or Browserify I've been using a bridge script that Webpacks files from node_modules to a vendor directory within grails-app/assets/javascripts. This gets the files into the asset-pipeline world in a web-friendly format and lets asset-pipeline take over for bundling and minification.
+
+The [sample repo](https://github.com/kevana/grails-es6-mocha-demo) has a full example of pulling redux-devtools from NPM, webpacking it to the asset-pipeline world, importing it into an ES2015 module, and testing that module with a Mocha spec.
+
+#### Module formats
+
+Babel can transpile ES2015 modules to AMD, UMD, and SystemJS module syntaxes, you're probably covered no matter what you use. You can even use two module syntaxes simultaneously if you have legacy modules in one syntax but create new modules in another.
+
+#### Incremental upgrades
+
+For existing projects that you'd like to start using ES2015 modules in you can use file extensions to make the change incrementally. Make sure the babel config **"processJsFiles"** is set to false and use the extension ".es6" on files you'd like transpiled by Babel. This allows interop with older files in other module formats.
+
+There's more info about all of the implementation details in the [sample repo](https://github.com/kevana/grails-es6-mocha-demo)'s readme. If you have questions feel free to reach out via email or twitter.

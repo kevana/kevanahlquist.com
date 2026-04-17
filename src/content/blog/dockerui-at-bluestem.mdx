@@ -1,0 +1,45 @@
+---
+title: "DockerUI at Bluestem"
+description: "DockerUI is a web GUI for the Docker remote API. It's like a swiss army knife: very flexible but can be unwieldy to use. Here's what we did at Bluestem to streamline our development workflow."
+pubDate: 2015-03-20
+tags: ["docker", "devops"]
+canonicalUrl: "https://medium.com/@kevanahlquist/dockerui-at-bluestem-2890bf1bcd45"
+---
+
+import { Image } from 'astro:assets';
+import imgSimpleBuilder from '../../images/blog/dockerui-at-bluestem/simple-builder.png';
+import imgComplexBuilder from '../../images/blog/dockerui-at-bluestem/complex-builder.png';
+import imgDashboard from '../../images/blog/dockerui-at-bluestem/main-dashboard.png';
+
+DockerUI is a web GUI for the Docker remote API. It's like a swiss army knife: very flexible but can be unwieldy to use. Luckily it's an Angular app that can be modified pretty easily. I want to share what we've done at Bluestem to streamline our development workflow. We use Docker and DockerUI for:
+
+- Test environments driven by Jenkins builds. Every feature branch builds a docker image that can be spun up for testing.
+- One-off apps for prototyping (Redis, Riak, Hystrix, anything). Now we don't have to ask ops to build a server every time we want to try out shiny new tech.
+- [Testing clusters for Selenium](https://medium.com/@kevanahlquist/selenium-grid-cluster-example-with-docker-and-fig-24943a5eca42).
+
+I've already written an article on clusters for Selenium, this one will focus on building test environments. Shortly after I joined Bluestem we switched from single-branch development to feature branch development for our main project. As a part of this switch we needed a scalable way to test branches before they were merged to the trunk. One of our primary goals in the process was ease of use for everyone from developers to product managers. We decided to use Jenkins to create Docker images for each feature branch and use a modified version of DockerUI to manage environment creation.
+
+<figure>
+  <Image src={imgSimpleBuilder} alt="Simple builder for the main app" />
+  <figcaption>Simple builder for the main app</figcaption>
+</figure>
+
+Docker has a ton of options for starting containers and it's easy to get lost, so for our main project we added a custom container-builder that exposes the environment, feature, and IP address to run on. This lets everyone on the team spin up branches quickly without needing to know how Docker works. Clicking the create button starts a new docker container with the right volumes mounted and ports 80 and 443 exposed.
+
+<figure>
+  <Image src={imgComplexBuilder} alt="More complex builder for backend services" />
+  <figcaption>More complex builder for backend services</figcaption>
+</figure>
+
+Our platform team wanted a bit more freedom for backend services so we made another container-builder that lets users change port bindings and data volumes. When we need more flexibility than this we can use DockerUI's standard container builder that has all options available. The purpose of these special builders is to streamline common tasks and minimize the amount of Docker knowledge needed to use the system.
+
+<figure>
+  <Image src={imgDashboard} alt="Main dashboard" />
+  <figcaption>Main dashboard</figcaption>
+</figure>
+
+To keep track of where branches are running we created a custom dashboard that lets us quickly create/destroy instances and see what addresses they're running on. This gives us fast access to the custom builders and 1-click removal of old environments.
+
+With this arrangement we've gone from 3 scheduled deployments of a single branch per day to 15+ on-demand deployments from ~25 feature branches per day. We can fully test features in isolation before they hit trunk and we're able to do it with a single VM running Docker.
+
+*The views expressed in this article are solely my own and do not necessarily reflect the views of Bluestem Brands, Inc.*

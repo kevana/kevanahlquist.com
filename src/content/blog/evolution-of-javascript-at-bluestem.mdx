@@ -1,0 +1,89 @@
+---
+title: "Evolution of Javascript at Bluestem"
+description: "Bluestem's journey with Javascript development — where we came from, where we're at, where we're headed, and some challenges that lay in our path."
+pubDate: 2016-02-16
+tags: ["javascript", "bluestem"]
+canonicalUrl: "https://medium.com/@kevanahlquist/evolution-of-javascript-at-bluestem-285e4fc5ca26"
+---
+
+We all want to work with the latest and greatest Javascript tech. Tools like Babel, React, and ESLint make our lives as developers a lot easier but, like all established companies, Bluestem has a lot of existing code that makes transitioning to use these tools harder. In this post I'll dive into Bluestem's journey with Javascript development including where we came from, where we're at, where we're headed, and some challenges that lay in our path.
+
+*Note: I use the company "we" in this article. This history begins several years before I joined Bluestem.*
+
+### The Beginning
+
+Our legacy website platform went live in 2010, and some parts date back to 2002. In typical web 1.0 fashion this original platform had very little javascript, most interactions were powered by form submission and page refreshes. One notable exception to this is the admin interface which is a full-featured heavy client app written in 2002 (very impressive, but relies on some legacy proprietary browser behavior and doesn't work in Chrome anymore).
+
+#### Bite-sized Javascript functionality (2010–2012)
+
+As we built new features and tried to achieve better UX we started adding javascript to our JSPs to do things like client-side input validation. We began to use AJAX forms to show users fancy progress bars while requests completed and started to add dynamic DOM manipulation.
+
+#### JSRender, Knockout, Angular (2012)
+
+The complexity of our dynamic DOM manipulation increased and we looked for tools to help us manage the complexity. We tried JSRender, Knockout, and Angular, and ended up sticking with Knockout. Most of our javascript was still living in the global namespace and third party scripts could easily clobber our functionality if we weren't careful.
+
+We were starting to take advantage of rich client-side functionality at this point but it was the wild west as far as development practices were concerned. Everyone did things differently, global variables were everywhere, and nothing had automated tests.
+
+#### Knockout + RequireJS (2013–2015)
+
+To get rid of the global variable problem and better organize our code we started organizing functionality into AMD modules and used RequireJS to deliver them to the browser. One of the biggest advantages of RequireJS has been the ability to use modules in CMS content without knowing ahead of time what modules need to be loaded on a page. We still use RequireJS for modules and it works well, but we switched from the [r.js optimizer](http://requirejs.org/docs/optimization.html) to [asset-pipeline](https://github.com/bertramdev/asset-pipeline) to bundle modules.
+
+Our main workhorse for client-side functionality during this period was Knockout. Most areas of the site with heavy functionality (search, product pages, payments, checkout) have a JSP shell and then Knockout takes over rendering on the client. This lets us perform partial server-side rendering and add functionality like inline validation after the javascript finishes loading.
+
+During this era we decided that writing unit tests for client-side code was a good idea. We built a test suite using QUnit running on PhantomJS. It was better than not having any tests but could take up to 10 minutes to run. Because of this we didn't write as many tests as we should have and often didn't run the existing tests before checking in.
+
+### Present
+
+Big releases and large refactors are scary, so one of our primary goals in modernizing our development practices is to improve our code incrementally. In order to accomplish this new modules use a different file extension (.es6). This lets our Babel know which modules should be transpiled and allows ESLint to apply different lint profiles to legacy .js and modern .es6 files.
+
+#### ES2015 module format (2015)
+
+Our legacy modules are all written in the AMD format and AMD doesn't have very good IDE support. Conveniences like autocomplete, click-to-definition, and find usages just didn't work, and this was really annoying. The ES2015 module format, aside from being less cluttered in my opinion, has first-class IDE support. We added the Babel transpiler to our pipeline to convert our ES2015 modules to AMD modules for browser consumption. This lets us incrementally convert our modules to ES2015 when we touch them in the course of regular development instead of performing a global refactor.
+
+#### Faster tests (2015)
+
+I wanted a test suite that runs in seconds, not minutes, and that meant ditching PhantomJS and running our tests on Node. To do this we have Babel convert the ES2015 modules to CommonJS syntax and use the Mocha test runner. In this environment we can't test DOM manipulation, but with frameworks like React manual DOM manipulation is strongly discouraged anyways. We do still run a separate suite of functional tests using Geb that test end-to-end app functionality.
+
+#### ESLint and style guide (2015)
+
+Our old javascript was the wild west, we didn't even run a linter. For new code we settled on the [Airbnb javascript style guide](https://github.com/airbnb/javascript) and lint profile (excluding semicolons), and lint errors now fail the build. Why?
+
+> *if it's worth complaining about, it's worth fixing in the code. (And if it's not worth fixing, it's not worth mentioning.) — [Golang FAQ](https://golang.org/doc/faq#unused_variables_and_imports)*
+
+Failing the build because of lint issues may seem extreme, but in large projects with many contributors it's too easy for warnings to sneak in. Real errors hide in piles of warnings and lint errors are easiest to fix when the code you wrote is still fresh in your mind. Plus, IntelliJ has built-in ESLint support, so we really have no excuse for checking in bad code.
+
+#### React, Redux (2015)
+
+Search was one of the oldest components of our platform and by far the buggiest. Similar to Facebook's [phantom notification](https://www.youtube.com/watch?v=nYkdrAPrdcw&feature=youtu.be&list=PLb0IAmt7-GS188xDYE-u1ShQmFFGbrk0v&t=753) problem, we played whack-a-mole with several issues that we could never entirely get rid of. The system was brittle, and while it wasn't Knockout's fault that we built a brittle system with it, I feel that Knockout didn't provide us with enough guidance to build a robust system with it.
+
+As a part of our re-factoring efforts, we knew we'd have to rewrite search so we took the opportunity to explore other frameworks. Some members of the team already had experience with Angular but none of us had tried out React or Redux. I put a proof-of-concept together and eventually we decided to implement all of search using React and Redux, in no small part because of the excellent developer tooling for those frameworks compared to Knockout. We are still using Knockout in other less complex areas of the site for server-side rendering, but as soon as we get React rendering on our servers I believe we'll start using it in more places.
+
+### Future
+
+#### Robust AB testing (2016)
+
+For the past few years we ran AB tests using cookies and some script tags in CMS content. Updates are instantaneous, don't require a code deploy, and product owners can perform tests without needing to bug a developer. One major limitation of this client-side implementation is that some types of tests like complete page switches (send user to "/foo/A" or "/foo/B" based on a cookie value) aren't reliable because a user won't be cookie'd into one side of the test until after their first page loads. Another limitation of the system is that tests can be hidden in different CMS areas and there is no global view of the current state.
+
+This arrangement worked well for a long time, but as our velocity has increased in the past two years it's becoming apparent that we need a more robust solution that gives us global visibility and control over tests.
+
+#### Server-side React rendering on Grails (2016)
+
+We're a Java shop and probably won't be switching to a Node web-app anytime soon, but we still want to use the fun parts of the JS ecosystem like server-side pre-rendering with React. Fundamentally this isn't new ground, React already supports server-side rendering using the Nashorn engine, we just need to hook it up with our application.
+
+### Challenges
+
+#### Third-party scripts and CMS content
+
+Modernizing our javascript wouldn't be possible without some heavy refactoring, but we have to remember that we don't control all of the code that uses our modules. Third party scripts that provide ads, recommendations and analytics sometimes hook into our code, and content in the CMS uses javascript modules to provide behavior such as modals and input validation. We need to make sure that we don't change module interfaces without warning consumers. We're currently experimenting with a few approaches for doing this including console messages warning of deprecation as well as pinging an analytics endpoint when a deprecated module is used so we can be confident that a module will not be removed until there are no consumers using it.
+
+#### Single-Site vs Platform
+
+One of the biggest challenges of our platform migration has been building an "n-ary" platform instead of a single-purpose website. Our old platform supported a few sites and had a lot of if-statements in the code that changed functionality based on what site it was running as. Our new platform needs to support multiple top level domain sites and potentially, several hundred sub-sites. The if-statement approach just doesn't scale. The plugin architecture of our new platform supports inheritance and functionality overrides but most of our legacy javascript wasn't written in a way that makes overriding specific functionality easy. At some point we'll probably need to refactor most of our javascript, but we can do this incrementally as we need certain features to be swappable or overridable.
+
+### Conclusion
+
+Things have changed a lot in the last two years and I think Bluestem is on a great trajectory with regards to Javascript development. With our new platform we're laying a foundation of modern frameworks with fast and easy testing. Does this sound like something you'd like to be a part of? Get in touch with us! Visit [bluestem.com/careers](http://www.bluestem.com/careers/).
+
+*Originally published at [code.bluestembrands.com](http://code.bluestembrands.com/2016/02/16/javascript-at-bluestem/) on February 16, 2016.*
+
+*The views expressed in this article are solely my own and do not necessarily reflect the views of Bluestem Brands, Inc.*

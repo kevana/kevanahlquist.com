@@ -1,0 +1,27 @@
+---
+title: "Bad Docker Patterns"
+description: "I started using Docker about two years ago and in that time I've tried a lot of different things. These are some of the ones that weren't very good ideas."
+pubDate: 2016-03-30
+tags: ["docker", "devops"]
+canonicalUrl: "https://medium.com/@kevanahlquist/bad-docker-patterns-711479b369d5"
+---
+
+I started using Docker about two years ago and in that time I've tried a lot of different things, these are some of the ones that weren't very good ideas:
+
+#### Different runtime images for each environment and app
+
+Our main web app has a different configuration for each brand (3 but soon to be 16) and we have environment configs for production, staging, test/sandbox, and simulator. This turned into a [combinatorial explosion](https://en.wikipedia.org/wiki/Combinatorial_explosion) really fast. Now we create one WAR per brand and include every environment config (minus sensitive info like keys and passwords) in the artifact. This lets us use a single JVM runtime image that downloads the WAR and upgrades are a lot less painful.
+
+#### Not using a private registry
+
+For a while we didn't use a registry at all because we didn't want to take the time to set one up and maintain it. When we updated our docker images we had to SSH into every box that used the images and manually rebuild them. We forgot at least one box every time and updates took a lot of elbow grease.
+
+Now that we have a registry a build job creates images in a controlled environment and build jobs can pull images down to any box. If we add a new node to our build cluster it will take a while to download images but it doesn't require any manual intervention.
+
+#### Using the latest tag
+
+At the time we thought using the latest tag would be convenient because whenever we update a Docker image we want the change to propagate to the builds right away. Sounds reasonable, right? What actually happened was whenever we changed a script in a Docker image we had to scramble to update all of the build jobs we just broke. Using explicit version tags makes it a lot easier to upgrade downstream projects at your own pace without breaking workflows for everyone else.
+
+#### Downloading from the internet in Dockerfiles
+
+Some of my original Dockerfiles downloaded things like a JRE and Tomcat from the wide open internet. It was really convenient but we didn't put these downloaded artifacts in our own repository and we've paid for it ever since. Most times when I rebuild these images I need to fix something because the network timed out or an artifact moved. If you don't have your own artifact repo (we use [Artifactory](https://www.jfrog.com/artifactory/)) I recommend you set one up ASAP. Downloads will usually be faster inside your own network and there's less chance of someone moving your cheese when you're trying to make a repeatable build process.

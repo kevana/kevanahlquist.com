@@ -1,0 +1,67 @@
+---
+title: "A starting point for setting timeouts"
+description: "Choosing timeout values for external service calls isn't easy. This post details the approach we used at Bluestem to choose better values and make our systems more resilient."
+pubDate: 2016-07-21
+tags: ["architecture", "resilience"]
+canonicalUrl: "https://medium.com/@kevanahlquist/a-starting-point-for-setting-timeouts-28079499ba9"
+---
+
+Choosing timeout values for external service calls isn't easy. There's usually black magic involved and sometimes we're just guessing. This post details the approach we used at Bluestem to choose better values and make our systems more resilient to performance issues and outages in our backend services.
+
+#### Where we were
+
+Bluestem has transitioned from a monolithic web stack to microservices over the past two years. We use Hystrix to wrap our calls to external services, but we didn't put much thought into tuning its parameters. We usually set timeouts in one of two ways:
+
+1. Copy/paste the nearest Hystrix settings from another service
+2. Set the timeouts to be super high so circuits never trip
+
+Method 1 is bad because every service is different — getting inventory for a product will probably have a wildly different response time than submitting an order. Method 2 is bad because high timeouts and thread pools completely negate the benefits of using Hystrix, and if we aren't getting any benefits then it's not worth the complexity.
+
+In the past year we realized that external services were an Achilles heel in our systems and long timeouts in particular were a major cause of cascading failures in the web stack.
+
+#### Tuning timeouts
+
+Recently we've been analyzing each service and adjusting its timeouts with the following process:
+
+1. Load test to find the service's behavior under maximum steady-state load (i.e. how much load can this service sustain indefinitely before it tips?).
+2. Gather empirical data on throughput, latency, and error rate from those load tests.
+3. Set baseline timeouts (and alerts) based on this data.
+4. Refine timeouts based on continued data-gathering to bring error rates to acceptable levels.
+
+#### Baseline values
+
+We chose to set baseline timeouts to 3 standard deviations above the average 99th percentile response time. For example, our CMS content service had an average 99th percentile response time of 366ms with a standard deviation of 184ms. We set the baseline timeout to 366ms + (3 * 183ms) = 918ms.
+
+#### What is the 99th percentile response time?
+
+This means that 99% of all requests complete in this time or less. A 500ms 99th percentile response time means 99% of all requests complete in 500ms or less. We calculate these percentiles over timeslices of 1 minute, then average the values over the course of an hour or longer.
+
+#### What's a standard deviation?
+
+Standard deviation quantifies the variation in a set of values. See [Wikipedia](https://en.wikipedia.org/wiki/Standard_deviation) for a rigorous explanation, but the general idea is that a higher standard deviation means values are more spread out, and a lower deviation means that values are closer together and closer to the average.
+
+#### Why three standard deviations?
+
+There's a tradeoff when setting timeouts. If you set them too low then you experience a higher error rate unnecessarily, and if you set them too high your system will be less resilient to backend failures. We want to set timeouts as low as possible without causing a large increase in errors. We chose three standard deviations because in data with a normal distribution 3 standard deviations will include 99.73% of values. In normal operation this means we will experience timeouts for (1-.99) * (1-.9973) = 0.0027% of requests.
+
+> Big Caveat: This assumes that our 99th percentile response time data points have a normal distribution. They don't, but it's a close enough approximation to give us a starting point.
+
+#### Refinements
+
+Once we had the baseline timeouts implemented we continued to refine values. This step is much less mathematical and usually involves white-box knowledge of the backend services. For example, credit applications interface with external vendors that tend to slow down significantly during holiday loads, but they are a critical feature for us so we would rather they succeed after 20s than timeout after 5s. In this case we set timeouts much higher than the baseline value. In another case, our CMS service delivers content that isn't vital to the critical revenue path. In this case we might choose a lower timeout (and higher error rate) if it means we can decrease our 99th percentile pageload times significantly.
+
+### Results
+
+#### Resiliency
+
+The frontend is more resilient to backend outages now. Backend outages that used to cause cascading failures now cause higher error rates while the system as a whole remains responsive.
+
+#### Service Level Objectives
+
+Before this effort most of our backend services didn't have formal [Service Level Objectives](https://en.wikipedia.org/wiki/Service_level_objective). With the data we gathered we have been able to establish SLOs for existing services.
+
+#### Alerts
+
+Because we now have SLOs for services, we are able to create monitors and alerts to notify the team when a service is operating outside of its expected objectives. This gives us a much better picture of the overall health of our systems and allows us to respond to potential issues like a service nearing its maximum tested load before it causes an outage. In the past we found out a service was overloaded by seeing high CPU usage and bad performance. Now we can anticipate overloading issues and scale in advance of traffic.
+
+*The views expressed in this article are solely my own and do not necessarily reflect the views of Bluestem Brands, Inc.*

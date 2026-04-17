@@ -109,7 +109,7 @@ body.blog {
 
 .blog-layout {
     display: grid;
-    grid-template-columns: 12rem 1fr;
+    grid-template-columns: 16rem 1fr;
     gap: 2rem;
     align-items: start;
 }
@@ -131,6 +131,9 @@ body.blog {
     margin-bottom: var(--spacing-sm);
     font-size: 0.85em;
     line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .blog-toc li.active a {

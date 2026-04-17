@@ -6,11 +6,11 @@ export async function getStaticPaths() {
   const posts = await getCollection('blog');
   return posts.map(post => ({
     params: { slug: post.id },
-    props: { post },
+    props: { post, allPosts: posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()) },
   }));
 }
 
-const { post } = Astro.props;
+const { post, allPosts } = Astro.props;
 const { Content } = await render(post);
 ---
 
@@ -23,14 +23,26 @@ const { Content } = await render(post);
   canonicalUrl={post.data.canonicalUrl}
   bodyClass="blog"
 >
-    <main>
-        <article>
-            <h1>{post.data.title}</h1>
-            <time datetime={post.data.pubDate.toISOString()}>
-                {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </time>
-            <hr>
-            <Content />
-        </article>
-    </main>
+    <div class="blog-layout">
+        <nav class="blog-toc">
+            <h2>All Posts</h2>
+            <ul>
+                {allPosts.map(p => (
+                    <li class={p.id === post.id ? 'active' : ''}>
+                        <a href={`/blog/${p.id}/`}>{p.data.title}</a>
+                    </li>
+                ))}
+            </ul>
+        </nav>
+        <main>
+            <article>
+                <h1>{post.data.title}</h1>
+                <time datetime={post.data.pubDate.toISOString()}>
+                    {post.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </time>
+                <hr>
+                <Content />
+            </article>
+        </main>
+    </div>
 </BaseLayout>

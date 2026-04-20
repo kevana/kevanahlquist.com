@@ -1,0 +1,46 @@
+---
+title: "DCI Event Score Push Notifications (the old way)"
+description: "Building a service that sends SMS messages with the latest DCI event scores as they are posted."
+pubDate: 2014-06-11
+tags: ["python", "projects"]
+canonicalUrl: "https://medium.com/@kevanahlquist/dci-event-score-push-notifications-the-old-way-d4b94e54cc91"
+---
+
+> Jan 9 2016 update: I discontinued CorpScores before the 2015 season because I joined the Blue Devils International Corps and didn’t have time (or internet access) during the season to manage it. Fortunately Drum Corps Planet released the <a href="http://www.drumcorpsplanet.com/drumscorps-for-iphone-android-windows-phone/" target="_blank" rel="noopener">DrumScorps</a> app and DCI released <a href="http://www.dci.org/ViewArticle.dbml?ATCLID=210208615" target="_blank" rel="noopener">native apps</a> for iOS and Android as well.
+
+The app is live at <a href="http://corpscores.herokuapp.com/" target="_blank" rel="noopener">corpscores.herokuapp.com</a>, the scraper runs on a separate VPS. I still need to make a lot of usability changes, but the core functionality is working.
+
+### Problem
+
+<a href="http://www.dci.org/" target="_blank" rel="noopener">DCI</a> doesn’t have an Android app or a mobile-friendly website. This makes checking scores after competitions very difficult for mobile users. This is a problem because corps members check scores often and almost always do so on mobile devices.
+
+### Band-Aid Solution
+
+I’m building a service that sends SMS messages with the latest event scores as they are posted. This is another Flask app. I’m also taking this opportunity to learn how to use Travis-CI, pytest, a different module structure, Flask Blueprints, an application generator, and maybe Docker for deployment. The code may be a bit messy until I figure all of that out. You can view current progress on <a href="https://github.com/kevana/corpscores" target="_blank" rel="noopener">Github</a>.
+
+### Challenge
+
+Score information will come from an HTML scraper (thanks <a href="http://www.crummy.com/software/BeautifulSoup/" target="_blank" rel="noopener">BeautifulSoup</a>). Making it robust will be difficult, and there is always the possibility that the website format is changed midway through the season.
+
+### Cost
+
+This is a For-The-Good-Of-The-Order project (zero revenue), I’m trying to minimize my costs. Part of that strategy is using email-to-SMS gateways instead of paying per-text for a service like Twilio.
+
+### Email-To-SMS
+
+Email-to-SMS isn’t split out into an independent library (it relies on the Flask-Mail plugin currently), but the the carrier info is available in a convenient python dict <a href="https://gist.github.com/kevana/063bd977826a1147539f" target="_blank" rel="noopener">here</a>. Entries are in the format:
+
+```
+"carrier_slug": {
+    "name": "Carrier Name",
+    "suffix": "@<carrier_gateway_email>.com"
+}
+```
+
+If you want to send a message, simply concatenate the 10 digit phone number (with no punctuation) to the carrier suffix. Send an email with the message contents to that address:
+
+```
+'5552126789@message.alltel.com'
+```
+
+I obtained this info from <a href="http://github.com/brendanlim/sms-fu" target="_blank" rel="noopener">brendanlim/sms-fu</a>, I just made a Python version from the YAML. Some entries are probably outdated and nonfunctional, let me know if you run into a broken one.

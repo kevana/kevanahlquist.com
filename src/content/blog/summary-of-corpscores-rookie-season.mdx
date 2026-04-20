@@ -1,0 +1,37 @@
+---
+title: "Summary of CorpScores' Rookie Season"
+description: "CorpScores is a service that provides up-to-the-minute score updates for Drum Corps International competitions."
+pubDate: 2014-09-11
+tags: ["python", "projects"]
+canonicalUrl: "https://medium.com/@kevanahlquist/summary-of-corpscores-rookie-season-5397c031d853"
+---
+
+<a href="https://github.com/kevana/dci-notify2" target="_blank" rel="noopener">CorpScores</a> is a service that provides up-to-the-minute score updates for Drum Corps International competitions. I started development in early June and was able to get the core functionality (user signup, SMS notifications) working in 2 weeks. This was just in time for the DCI season to begin. The automatic score scraper followed a week later. Over the season I accumulated 200 users and sent out 35,000 SMS notifications. This is a quick rundown of my takeaways from the season.
+
+#### Market Research
+
+I did this as a learning project in between graduation and starting work so I didn’t bother doing any real research. If I had I probably would’ve spent the time on Android instead (DCI has an app for iOS, but not Android). Also, I had to lower my user base expectations quite a bit during the course of the season.
+
+#### Testing — Good
+
+I learned my testing lesson the hard way builing <a href="https://github.com/kevana/ummbNet" target="_blank" rel="noopener">ummbNet</a> and wasn’t eager for a repeat. This time I took advantage of cookiecutter-flask to provide the skeleton architecture and test fixtures for the service. Starting with a full test-suite from the beginning made development much smoother than it was with ummbNet.
+
+#### Logging is hard
+
+One thing I didn’t do right was production logging. Due to good testing I rarely had to debug issues in production, but when I did the lack of good logs definitely slowed me down. After the season ended I added Sentry to both the service and the automatic score scraper. Next season this will help me catch bugs much sooner.
+
+#### Production incidents
+
+Through the summer there were three incidents where the service got stuck in a loop and sent duplicate notifications to users. Each time I was able to temporarily disable notifications and manually resolve the issue. All of these incidents resulted from the automatic scraper behaving unexpectedly when it encountered certain error conditions. Had I implemented better logging, I would have uncovered these errors sooner.
+
+#### Platform, not service
+
+In the big picture, CorpScores needs to be a platform, not just another small tool. Today news, scores, forums, and stats all exist in the DCI community, but many were built before mobile usability was a concern and are very fragmented. Because of time limitations, I was only able to implement one facet of the big picture.
+
+#### Revenue
+
+I decided at the beginning of the season not to try to monetize corpScores this season. This was a good choice, if only because the service I built isn’t very conducive to traditional ads. In the long term, this service will continue to be offered as a free convenience. Other parts of the platform will have better opportunities for monetization.
+
+#### Overall
+
+I think overall the season was a great success. I hope next season I’ll have the opportunity to work with DCI and community partners to create a full platform experience.

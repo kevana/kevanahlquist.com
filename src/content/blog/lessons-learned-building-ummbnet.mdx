@@ -1,0 +1,51 @@
+---
+title: "Lessons learned building ummbNet"
+description: "Lessons from building a Python WSGI app from scratch as a University of Minnesota independent study project."
+pubDate: 2014-05-27
+tags: ["python", "web"]
+canonicalUrl: "https://medium.com/@kevanahlquist/lessons-learned-building-ummbnet-1887fe0da957"
+---
+
+I decided to build a web app as an independent study project for my University of Minnesota course work. <a href="https://github.com/kevana/ummbNet" target="_blank" rel="noopener">ummbNet</a> was the result. It’s a Python WSGI app built with the Flask framework that handles event scheduling for the University of Minnesota Pep Bands. The following are summaries of what I learned about some topics while building ummbNet.
+
+### Did it need to be Google/Amazon/Facebook/Twitter scale?
+
+No, building it with that goal would have been a waste of effort. There are under 500 users and events to schedule each year and I needed to have a beta version running in 6 weeks. A load balanced redundant app cluster with automatic failover would be nice to have, but this app will never see enough traffic to warrant it. A single small server is more than enough to handle the load and the risk of downtime is acceptable.
+
+### Should I have tested from the start?
+
+> *The problem with quick and dirty, is that the dirty remains long after the quick has been forgotten — Steve C. McConnell*
+
+Yes. It started with me tinkering with a Flask tutorial and before I knew it I had a couple thousand lines of untested code. Later, I spent the better part of a week refactoring the entire app in order to get it to a testable state. Even if I didn’t write every test case right away, I should’ve at least learned how to test with Flask before writing any code.
+
+### Why would I ever let myself build up technical debt?
+
+From the start I had to balance my desire to add new features with the need to fix and polish what was already there. If I got further ahead with adding features, the pile of technical debt grew quickly. It never got too far out of hand, but if I had not been conscious of it, the app could have quickly collapsed into a bug-ridden heap of half-implemented features.
+
+Technical debt is like any other form of debt. It is a powerful tool that can be leveraged effectively in some situations, but its misuse can cause a lot of harm.
+
+### Is this the right architecture?
+
+The architecture isn’t perfect, but it works. I started with the lofty goal of planning the app architecture perfectly from the start to avoid refactoring later. Some parts of the structure remained similar, but I tried at least 3 versions of URL structures and 2 versions of backend code organization before ummbNet reached its current state. Luckily, I had the freedom to try multiple options because the project wasn’t in production yet.
+
+### How do I deploy things?
+
+Automated deployment tools are convenient, but my time spent at the bottom of the learning curve was a major consideration. I chose to use git for deployment instead of spending the time to learn and set up an automated deployment tool. This is still on the todo list, but it is not a top priority.
+
+### How long will this feature take?
+
+> There are lies, damn lies and estimates* — *Seb Rose
+
+Estimates are notoriously hard to get right, and I’m no better at them than anyone else. Sometimes what I thought would be a 1 day feature took an hour or a week. I realized that many delays were caused by old features that broke when the new features were added on top. After adding a test suite, major delays were less common, but my estimates were still less accurate than I would like.
+
+### The users want what!?
+
+Even after reading Marty Cagan’s **Inspired: How To Create Products Customers Love**, I had to actively remind myself to talk to real users to see what features they needed instead of assuming I knew best. I was a member of the userbase the app was for, but my opinions on the importance of certain features were often different from the majority of users.
+
+### This code took forever to write, I can’t just throw it out!
+
+> *Incremental improvement of a pile of crap sometimes results in a larger pile of crap.*
+
+It hurts to throw out code that I spent a long time to get (barely) working, but if the code was a hacky mess then starting over from scratch was sometimes the best option.
+
+I learned a lot building ummbNet from scratch, and I highly recommend that anyone studying computer science at the University of Minnesota takes the opportunity to do an independent study project like this. The program doesn’t require a senior capstone project, but I believe that projects like this provide experiences that you won’t get from regular technical elective classes.

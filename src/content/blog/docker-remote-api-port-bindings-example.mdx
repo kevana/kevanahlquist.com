@@ -1,0 +1,44 @@
+---
+title: "Docker remote API port bindings example"
+description: "An example of using the Docker remote API to create and run a container with port bindings."
+pubDate: 2014-11-14
+tags: ["docker", "devops"]
+canonicalUrl: "https://medium.com/@kevanahlquist/docker-remote-api-port-bindings-example-b55bc5194e20"
+---
+
+This is an example of using the remote API to create and run a container with port bindings. This is the equivalent action through the docker CLI:
+
+```
+$ docker run -p host_ip:host_port:container_port image_name
+```
+
+The CLI’s run command corresponds to multiple remote API commands. When using the remote API you need to specify **ExposedPorts** when creating the container and **PortBindings** when starting it. (<a href="https://docs.docker.com/reference/api/docker_remote_api_v1.15/#31-inside-docker-run" target="_blank" rel="noopener">see here for more details</a>)
+
+Specifying **ExposedPorts** when creating containers:
+
+```
+POST /containers/create
+{
+    "Image": image_id,
+    "ExposedPorts": {
+        "container_port/tcp": {}
+    }
+}
+```
+
+Specifying **PortBindings **when starting containers:
+
+```
+POST /containers/(id)/start
+{
+    "id": id,
+    "PortBindings": {
+        "container_port/tcp": [
+            {
+                 "HostIp": "host_ip", // Strings, not numbers here
+                 "HostPort": "host_port"
+            }
+        ]
+    }
+}
+```

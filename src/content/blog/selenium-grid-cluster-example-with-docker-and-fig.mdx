@@ -1,0 +1,72 @@
+---
+title: "Selenium Grid Cluster Example With Docker and Fig"
+description: "An example of creating a Selenium Grid cluster with Docker and docker-compose (formerly fig)."
+pubDate: 2015-01-16
+tags: ["docker", "selenium", "testing"]
+canonicalUrl: "https://medium.com/@kevanahlquist/selenium-grid-cluster-example-with-docker-and-fig-24943a5eca42"
+---
+
+> Updated Sept 22, 2015: fig is dead, long live docker-compose.
+
+Selenium is a powerful tool for automated front-end testing, but it’s not known for its blazing fast speed. Fortunately, Selenium provides built-in cluster support to parallelize your tests across multiple machines and speed up the test cycle. Test runners communicate with a single hub that transparently distributes tests to worker nodes for execution.
+
+This is an example of creating a Selenium Grid cluster consisting of containers for the app, test-runner, Selenium hub, and many Selenium nodes. You may see limited performance gains because all nodes in this virtual cluster will run on the same physical Docker host. To spread nodes across multiple physical hosts you can use a Docker clustering system such as <a href="https://github.com/docker/swarm" target="_blank" rel="noopener">swarm</a>. docker-compose is used to scale the number of nodes in the cluster. You will need <a href="https://docs.docker.com/installation/" target="_blank" rel="noopener">Docker</a> and <a href="https://docs.docker.com/compose/install/" target="_blank" rel="noopener">docker-compose</a> installed to try this.
+
+```
+# docker-compose.yml contents:
+hub:
+  image: selenium/hub
+```
+
+```
+node:
+  image: selenium/node-chrome
+  links:
+   — “hub:hub”
+   — “webapp:testwww.your-app.com"
+```
+
+```
+webapp:
+  image: your-app-image:version
+
+test:
+  image: your-test-image:version
+  links:
+   — "hub:hub"
+```
+
+Your test image can contain any test runner that can communicate with a remote Selenium host. In your test configuration use “hub:4444” as the hub’s address. The base url of your app will be “testwww.your-app.com”. For more info on why this works, see the <a href="https://docs.docker.com/userguide/dockerlinks/" target="_blank" rel="noopener">Docker docs on container linking</a>.
+
+With this configuration none of the containers are exposed to the outside world. This provides isolation and increases the repeatability of your tests.
+
+To start a new cluster, use docker-compose to create the containers and scale the number of nodes:
+
+```
+#!/bin/bash
+docker-compose up -d
+# Give the hub time to start and accept
+# connections before scaling nodes
+sleep 1
+docker-compose scale node=5
+```
+
+When testing is complete you can stop and remove the grid containers.
+
+```
+#!/bin/bash
+docker-compose stop
+docker-compose rm --force
+```
+
+If you plan on running multiple grids concurrently then you can use use a unique value as part of docker-compose’s project name to avoid conflicts when the grid is shut down:
+
+```
+docker-compose -p appname${BUILD_ID} up -d
+...
+# Shutdown and container cleanup
+docker-compose -p appname${BUILD_ID} stop
+docker-compose -p appname${BUILD_ID} rm --force
+```
+
+This example only shows the basic structure. In a build pipeline the docker-compose.yml would probably be generated from a template to inject version numbers or image names. Also, you’ll probably want to access test results at some point. This may mean pulling the test runner out of Docker and exposing the hub.

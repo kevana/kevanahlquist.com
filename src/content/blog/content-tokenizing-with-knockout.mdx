@@ -1,0 +1,72 @@
+---
+title: "Content tokenizing with Knockout"
+description: "Using basic token replacement in a custom Knockout binding to safely include dynamic data in CMS content."
+pubDate: 2014-10-04
+tags: ["javascript", "knockout"]
+canonicalUrl: "https://medium.com/@kevanahlquist/content-tokenizing-with-knockout-9aa559e4ebbf"
+---
+
+Sometimes we need content from a CMS to include data that’s not available until render time. A common example is customer names:
+
+```
+Hey [name], thanks for signing up!
+```
+
+Our legacy code handles this at the server in JSPs, but our new development pushes most of this work to the client side. Since we’re using Knockout, an obvious solution is to put a data-bind in the string from the CMS:
+
+```
+var content = 'Hey <span data-bind="text: name"></span>, thanks for signing up!'
+```
+
+And then bind it to the DOM with another data-bind:
+
+```
+<span data-bind="text: $data.content"></span>
+```
+
+As I learned, this usually won’t work. Many of Knockout’s builtin bindings (including html and text) don’t process bindings in the elements they create. From the html binding <a href="https://github.com/knockout/knockout/blob/master/src/binding/defaultBindings/html.js" target="_blank" rel="noopener">source</a>:
+
+```
+// Prevent binding on the dynamically-injected HTML (as developers are unlikely to expect that, and it has security implications)
+```
+
+You could get around this by making a version of the text or html bindings that allows bindings within its contents (see the <a href="http://knockoutjs.com/documentation/custom-bindings-controlling-descendant-bindings.html" target="_blank" rel="noopener">docs on controlsDescendantBindings</a> for more info), but that brings up a couple issues:
+
+- Content in a CMS isn’t in your code repo, and you may not be able to see it at all. Removing or changing a field in a ViewModel can break bindings in CMS content and you may not have access to update them.
+- Content in a CMS is usually updated by people that don’t have much coding experience and a syntax error can stop Knockout binding for an entire page, not just the section the binding is in. That’s a recipe for turning small mistakes into major problems. We want to minimize the blast radius when errors occur.
+
+I used basic token replacement in a custom binding to avoid those issues. Here’s an example without our CMS-specific code:
+
+```
+ko.bindingHandlers.tokenizedContent = {
+    init: function(element, valueAccessor, allBindings, viewModel,  bindingContext) {
+
+        var content = ko.unwrap(valueAccessor());
+```
+
+```
+if (allBindings.has('tokens')) {
+            var tokens = allBindings.get(‘tokens’);
+            for (token in tokens) {
+                content = content.replace(token, tokens[token]);
+            }
+        }
+```
+
+```
+ko.utils.setHtml(element, content);
+```
+
+```
+return { 'controlsDescendantBindings': true };
+    }
+};
+```
+
+If no tokens are found, tokenizedContent behaves just like the html binding. If tokens are found, each token is replaced with its value before rendering. This is the syntax in templates:
+
+```
+<article data-bind="tokenizedContent: $data.content, tokens: {'[name]': $data.name}"></article>
+```
+
+Our convention is to wrap token names in square brackets (e.g. [tokenName]), but any format can be used. Token declarations are accessible to developers in source control, and errors in CMS content won’t break entire pages. It does add another layer of complexity over using knockout bindings directly in content, but I think the benefits in robustness and ease of maintenance outweigh the downsides.

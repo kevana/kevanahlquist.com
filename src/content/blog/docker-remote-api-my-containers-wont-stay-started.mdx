@@ -1,0 +1,25 @@
+---
+title: "Docker remote API: \"My containers won't stay started\""
+description: "If your containers work fine through the CLI but exit immediately through the remote API, this may be for you."
+pubDate: 2014-11-25
+tags: ["docker", "devops"]
+canonicalUrl: "https://medium.com/@kevanahlquist/docker-remote-api-my-containers-wont-stay-started-40860ae8b483"
+---
+
+If your containers work just fine when started through the CLI but exit immediately when started through the remote API, this may be for you. A common Dockerfile pattern for keeping service containers running is to start the services and then start something that waits for input on stdin, like bash:
+
+```
+CMD /bin/start_things.sh && /bin/bash
+```
+
+This works for the CLI, but if you don’t explicitly open stdin with the remote API then bash will exit immediately and the container will stop. To open stdin, include the **OpenStdin** parameter in your container creation call:
+
+```
+POST /containers/create
+{
+    "OpenStdin": true
+    ...
+}
+```
+
+<a href="https://docs.docker.com/reference/api/docker_remote_api_v1.15/#create-a-container" target="_blank" rel="noopener">Full docs</a>

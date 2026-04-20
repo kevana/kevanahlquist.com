@@ -1,0 +1,46 @@
+---
+title: "Make your own pit of success"
+description: "Even if you're not writing a framework, your company's codebase is one. Design it so developers fall into winning practices."
+pubDate: 2016-05-30
+tags: ["design", "engineering"]
+canonicalUrl: "https://medium.com/@kevanahlquist/make-your-own-pit-of-success-d2d1f0de0fd1"
+---
+
+import { Image } from 'astro:assets';
+import imgClippy from '../../images/blog/make-your-own-pit-of-success/clippy.jpeg';
+import imgDevModeWarning from '../../images/blog/make-your-own-pit-of-success/dev-mode-warning.png';
+
+> The Pit of Success: in stark contrast to a summit, a
+> peak, or a journey across a desert to find victory through many trials and
+> surprises, we want our customers to simply fall into winning practices by using
+> our platform and frameworks.
+> - <a href="https://blogs.msdn.microsoft.com/brada/2003/10/02/the-pit-of-success/" target="_blank" rel="noopener">Brad Abrams, MDSN blog</a>
+
+The Pit of Success is an idea that framework designers <a href="https://facebook.github.io/react/blog/2014/03/28/the-road-to-1.0.html#api-cleanup" target="_blank" rel="noopener">think about a lot</a>, and the rest of us should too. Even if you’re not writing a framework for external use, your company’s codebase is a framework. Developers that come after you will mimic the patterns and practices in it when they add new features, and you can’t assume that everyone else knows what you do about it. Here are a couple cases where we’ve applied a pit-of-success mindset in our codebase.
+
+#### Modals
+
+We have a javascript module for managing modals. It used to be powered by jQuery Reveal, now it’s Bootstrap. It lets you display a modal without worrying about the backend and lets you register callbacks for when the modal has finished opening or closing. Javascript Promises weren’t around when this was created. One of the most common usages of it is to open a modal and then apply Knockout bindings after the modal is created. This use case is so common that we added support for it directly to the modal module. All you have to do is provide a ViewModel in the modal options and it gets bound automatically for you.
+
+Recently I noticed that no one was using it. Why not? Its usage was documented in the module docstring. All anyone had to do was look at it. But as developers we don’t do that. We find an example somewhere else in the code and use that to build our solution. Most examples in the code use callbacks to do things after the modal opens, so logically the developers did that for Knockout bindings too. As a result there’s a lot of extra Knockout boilerplate that doesn’t need to be there.
+
+So what can we do about this? I could’ve brought up the topic at a dev meeting and showed some examples, but this isn’t a sustainable solution. I can’t expect anyone to remember my primer on modal usage from a meeting 6 months ago. A constant stream of useful but not timely information isn’t very effective. What we really need is just-in-time hints when someone builds a new modal (like Clippy, but useful).
+
+<figure>
+  <Image src={imgClippy} alt="Clippy" />
+</figure>
+
+I got the shovel out and dug a little pit of success. Now if you pass a callback to the modal manager that applies knockout bindings the modal manager prints a warning (in dev mode) telling you how to use the easier way that’s already built.
+
+<figure>
+  <Image src={imgDevModeWarning} alt="Sample output from dev-mode warning" />
+  <figcaption>Sample output from dev-mode warning</figcaption>
+</figure>
+
+#### Read-only domain objects
+
+Another example from our codebase of pushing people towards intended usage is read-only versions of database objects. Grails Object Relational Mapping (GORM) is very powerful and make it really easy to accidentally modify database objects. This makes it a great footgun: maybe you only wanted to override a user property for a particular view, but with an ORM object now you’ve accidentally persisted that change back to the database.
+
+To minimize bugs like these we almost always deal with read-only POJOs instead of the domain objects directly. You can still access the ORM object if you need to, but most of the codebase expects the POJOs so there’s a lot more friction this way. Even a new hire without any contextual info will quickly gravitate towards the read-only paradigm because it’s just easier to use in our codebase.
+
+Your coworkers are smart problem-solvers. They’ll find a way to make things work, but it may not be the way you intended when you built a feature. Provide just-in-time hints and help each other out. If you intend for a module to be used a certain way, throw warnings if someone tries to use it the wrong way. Code reviews and pairing are great tools for spreading knowledge through your team, but in my opinion the code itself is the best tool.

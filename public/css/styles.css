@@ -161,6 +161,16 @@ body.blog figure {
     margin: var(--spacing-lg) 0;
 }
 
+body.blog figure {
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+body.blog pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
 body.blog figcaption {
     margin-top: var(--spacing-sm);
     margin-bottom: var(--spacing-lg);
